@@ -96,12 +96,18 @@ int executeChallenge(int index, int fdIn, int fdOut) {
         }
         
         if (challenge->questionInvestigate != NULL) {
-            dprintf(fdOut, "%s", "----- PREGUNTA PARA INVESTIGAR -----\n");
+            dprintf(fdOut, "%s", "\n----- PREGUNTA PARA INVESTIGAR -----\n");
             dprintf(fdOut, "%s\n", challenge->questionInvestigate);
         }
         
         if (challenge->questionFunction != NULL) {
             challenge->questionFunction(fdOut);
+        }
+
+        answeredCorrectly = 1;
+
+        if (challenge->answerFunction != NULL) {
+            answeredCorrectly = challenge->answerFunction(fdIn, fdOut);
         }
 
         if (challenge->answer != NULL) {
@@ -110,9 +116,7 @@ int executeChallenge(int index, int fdIn, int fdOut) {
                 printf("Failed to read from file descriptor %d. Server closing.\n", fdIn);
                 return 0;
             }
-            answeredCorrectly = (strncmp(enteredAnswer, challenge->answer, n) == 0);
-        } else {
-            answeredCorrectly = challenge->answerFunction == NULL ? 1 : challenge->answerFunction(fdIn, fdOut);
+            answeredCorrectly = (strcmp(enteredAnswer, challenge->answer) == 0);
         }
 
     } while (!answeredCorrectly);
@@ -151,5 +155,19 @@ static void normal(int fdOut){
 }
 
 static int quine(int fdIn, int fdOut) {
-    return 0;
+    int e = system("gcc quine.c -o quine");
+    if (e != 0) {
+        return 0;
+    }
+
+    dprintf(fdOut, "%s", "\n¡Genial!, ya lograron meter un programa en quine.c, veamos si hace lo que corresponde.\n");
+
+    e = system("./quine | diff - quine.c");
+    if (e != 0) {
+        dprintf(fdOut, "%s", "diff encontró diferencias.\n");
+        return 0;
+    }
+
+    dprintf(fdOut, "%s", "La respuesta es chin_chu_lan_cha\n");
+    return 1;
 }
