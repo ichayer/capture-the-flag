@@ -1,11 +1,16 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
+/* Standard library */
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
+
+/* Local headers */
 #include "challenges.h"
-#include "challengeStrings.h"
 #include "utils.h"
 
 #define CHALLENGE_BADFD 13
@@ -18,6 +23,7 @@ typedef void (*TChallengeQuestionFunction)(int fdOut);
 
 /**
  * @brief Represents a function that will handle a challenge answer.
+ *
  * @returns Whether the question was answered correctly.
  */
 typedef int (*TChallengeAnswerFunction)(int fdIn, int fdOut);
@@ -43,7 +49,7 @@ static ssize_t dgetline(int fd, char* buffer, size_t maxSize) {
         if (c < 32 || c > 126) {
             continue;
         }
-        
+
         if (count < maxSize - 1) {
             buffer[count++] = c;
         }
@@ -58,7 +64,6 @@ static void filter(int fdOut);
 static void hiddenString(int fdOut);
 static void normal(int fdOut);
 static int quine(int fdIn, int fdOut);
-static void clearScreen();
 
 int gdbme(int fdIn, int fdOut) {
     pid_t pid = getpid();
@@ -66,24 +71,30 @@ int gdbme(int fdIn, int fdOut) {
         dprintf(fdOut, "La respuesta es gdb_rules");
     }
 
-    char enteredAnswer[1024];
-    ssize_t n = dgetline(fdIn, enteredAnswer, sizeof(enteredAnswer));
-    return n >= 0 && strncmp(enteredAnswer, "gdb_rules", n) == 0;
+    return 0;
 }
 
 static const TChallenge challenges[] = {
-    {questions[0], questionsInvestigate[0], NULL, answers[0], NULL},
-    {questions[1], questionsInvestigate[1], NULL, answers[1], NULL},
-    {questions[2], questionsInvestigate[2], NULL, answers[2], NULL},
-    {questions[3], questionsInvestigate[3], writeBadFD, answers[3], NULL},
-    {questions[4], questionsInvestigate[4], NULL, answers[4], NULL},
-    {questions[5], questionsInvestigate[5], NULL, answers[5], NULL},
-    {questions[6], questionsInvestigate[6], filter, answers[6], NULL},
-    {questions[7], questionsInvestigate[7], hiddenString, answers[7], NULL},
-    {questions[8], questionsInvestigate[8], NULL, answers[8], NULL},
-    {questions[9], questionsInvestigate[9], NULL, answers[9], quine},
-    {questions[10], questionsInvestigate[10], NULL, answers[10], gdbme},
-    {questions[11], questionsInvestigate[11], normal, answers[11], NULL}
+    {"Bienvenidos al TP3 y felicitaciones, ya resolvieron el primer acertijo.\n\n"
+     "En este TP deberan finalizar el juego que ya comenzaron resolviendo los desafios de cada nivel.\n"
+     "Ademas tendran que investigar otras preguntas para responder durante la defensa.\n"
+     "El desafio final consiste en crear un programa que se comporte igual que yo, es decir, que provea\n"
+     "los mismos desafios y que sea necesario hacer lo mismo para resolverlos. No basta con esperar la respuesta.\n"
+     "Ademas, deberan implementar otro programa para comunicarse conmigo.\n"
+     "Deberan estar atentos a los easter eggs.\n\n"
+     "Para verificar que sus respuestas tienen el formato correcto respondan a este desafio con la palabra \'entendido\'",
+     "¿Como descubrieron el protocolo, la direccion y el puerto para conectarse?", NULL, "entendido", NULL},
+    {"The Wire S1E5 \n5295 888 6288", "¿Que diferencias hay entre TCP y UDP y en que casos conviene usar cada uno?", NULL, "itba", NULL},
+    {"https://ibb.co/tc0Hb6w", "¿El puerto que usaron para conectarse al server es el mismo que usan para mandar las respuestas? ¿Por que?", NULL, "M4GFKZ289aku", NULL},
+    {"EBADF... \nwrite: Bad file descriptor", "¿Que util abstraccion es utilizada para comunicarse con sockets? ¿Se puede utilizar read(2) y write(2) para operar?", writeBadFD, "fk3wfLCm3QvS", NULL},
+    {"respuesta = strings:277", "¿Como garantiza TCP que los paquetes llegan en orden y no se pierden?", NULL, "too_easy", NULL},
+    {".data .bss .comment ? .shstrtab .symtab .strtab", "Un servidor suele crear un nuevo proceso o thread para atender las conexiones entrantes. ¿Que conviene mas?", NULL, ".RUN_ME", NULL},
+    {"Filter error", "¿Como se puede implementar un servidor que atienda muchas conexiones sin usar procesos ni threads?", filter, "K5n2UFfpFMUN", NULL},
+    {"¿?", "¿Que aplicaciones se pueden utilizar para ver el trafico por la red?", hiddenString, "BUmyYq5XxXGt", NULL},
+    {"Latexme \nSi \n\\mathrm{d}y = u^v{\\cdot}(v'{\\cdot}\\ln{(u)}+v{\\cdot}\frac{u'}{u}) \nentonces \ny =", "sockets es un mecanismo de IPC. ¿Que es mas eficiente entre sockets y pipes?", NULL, "u^v", NULL},
+    {"quine", "¿Cuales son las caracteristicas del protocolo SCTP?", NULL, "chin_chu_lan_cha", quine},
+    {"b gdbme y encontrá el valor mágico", "¿Que es un RFC?", NULL, "gdb_rules", gdbme},
+    {"Me conoces", "¿Fue divertido?", normal, "normal", NULL}
 };
 
 int executeChallenge(int index, int fdIn, int fdOut) {
@@ -137,16 +148,21 @@ int executeChallenge(int index, int fdIn, int fdOut) {
             }
 
             answeredCorrectly = (strcmp(start, challenge->answer) == 0);
+
+            if (!answeredCorrectly) {
+                dprintf(fdOut, "Respuesta incorrecta: %s", start);
+                sleep(2);
+            }
         }
 
     } while (!answeredCorrectly);
-
     dprintf(fdOut, "\n\n");
     return 1;
 }
 
 void writeBadFD(int fdOut) {
-    dprintf(CHALLENGE_BADFD, "................................La respuesta es fk3wfLCm3QvS");
+    const char* s = "................................La respuesta es fk3wfLCm3QvS";
+    write(CHALLENGE_BADFD, s, strlen(s));
 }
 
 static void filter(int fdOut) {
@@ -154,9 +170,8 @@ static void filter(int fdOut) {
 
     srand(time(NULL));
 
-    int random;
     for (int i = 0; answer[i]; ++i) {
-        random = randNormalize() * MAX_RAND_CHARACTERS;
+        int random = randNormalize() * MAX_RAND_CHARACTERS;
         for (int j = 0; j < random; ++j) {
             dprintf(STDERR_FILENO, "%c", randPrintableCharacter());
         }
@@ -190,8 +205,4 @@ static int quine(int fdIn, int fdOut) {
 
     dprintf(fdOut, "%s", "La respuesta es chin_chu_lan_cha\n");
     return 1;
-}
-
-static void clearScreen(){
-    write(1, "\033[1;1H\033[2J", 10);
 }

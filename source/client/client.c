@@ -1,3 +1,7 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
+/* Standard library */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -29,23 +33,20 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    printf("Connected\n");
-    
     char* lineBuf = NULL;
     size_t lineBufSize = 0;
     size_t lineLen;
 
     while ((lineLen = getline(&lineBuf, &lineBufSize, stdin)) >= 0) {
-        printf("Sending %ld bytes: %s.\n", lineLen, lineBuf);
-        fflush(stdout);
         if (send(socketFD, lineBuf, lineLen, 0) < 0) {
             perror("Failed to send");
             break;
         }
     }
 
-    free(lineBuf);
+    printf("Disconnected.\n");
 
-    close(socketFD); // Server sees EOF
+    free(lineBuf);
+    close(socketFD);
     return 0;
 }

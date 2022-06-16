@@ -1,10 +1,17 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
+/* Standard library */
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+
+/* Local headers */
 #include "challenges.h"
+#include "utils.h"
 
 #define PORT 8080
 #define BACKLOG 5
@@ -66,14 +73,14 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    printf("Connected\n");
-
     int index = 0;
     while (executeChallenge(index, newSocket, STDOUT_FILENO)) {
         index++;
     }
-    
-    printf("Closing socket\n");
+
+    clearScreen();
+    printf("%s", "Felicitaciones, finalizaron el juego. Ahora deberán implementar el servidor que se comporte como el servidor provisto");
+
     close(socketFD);
     return 0;
 }
