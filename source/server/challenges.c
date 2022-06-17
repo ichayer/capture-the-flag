@@ -87,8 +87,8 @@ static const TChallenge challenges[] = {
     {"The Wire S1E5 \n5295 888 6288", "¿Que diferencias hay entre TCP y UDP y en que casos conviene usar cada uno?", NULL, "itba", NULL},
     {"https://ibb.co/tc0Hb6w", "¿El puerto que usaron para conectarse al server es el mismo que usan para mandar las respuestas? ¿Por que?", NULL, "M4GFKZ289aku", NULL},
     {"EBADF... \nwrite: Bad file descriptor", "¿Que util abstraccion es utilizada para comunicarse con sockets? ¿Se puede utilizar read(2) y write(2) para operar?", writeBadFD, "fk3wfLCm3QvS", NULL},
-    {"respuesta = strings:277", "¿Como garantiza TCP que los paquetes llegan en orden y no se pierden?", NULL, "too_easy", NULL},
-    {".data .bss .comment ? .shstrtab .symtab .strtab", "Un servidor suele crear un nuevo proceso o thread para atender las conexiones entrantes. ¿Que conviene mas?", NULL, ".RUN_ME", NULL},
+    {"respuesta = strings:63", "¿Como garantiza TCP que los paquetes llegan en orden y no se pierden?", NULL, "too_easy", NULL},
+    {".text .fini .rodata ? .eh_frame_hdr .eh_frame .init_array", "Un servidor suele crear un nuevo proceso o thread para atender las conexiones entrantes. ¿Que conviene mas?", NULL, ".RUN_ME", NULL},
     {"Filter error", "¿Como se puede implementar un servidor que atienda muchas conexiones sin usar procesos ni threads?", filter, "K5n2UFfpFMUN", NULL},
     {"¿?", "¿Que aplicaciones se pueden utilizar para ver el trafico por la red?", hiddenString, "BUmyYq5XxXGt", NULL},
     {"Latexme \nSi \n\\mathrm{d}y = u^v{\\cdot}(v'{\\cdot}\\ln{(u)}+v{\\cdot}\frac{u'}{u}) \nentonces \ny =", "sockets es un mecanismo de IPC. ¿Que es mas eficiente entre sockets y pipes?", NULL, "u^v", NULL},
@@ -173,7 +173,7 @@ static void filter(int fdOut) {
     for (int i = 0; answer[i]; ++i) {
         int random = randNormalize() * MAX_RAND_CHARACTERS;
         for (int j = 0; j < random; ++j) {
-            dprintf(STDERR_FILENO, "%c", randPrintableCharacter());
+            dprintf(fdOut, "%c", randPrintableCharacter());
         }
         dprintf(fdOut, "%c", answer[i]);
     }
